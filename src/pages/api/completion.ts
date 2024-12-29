@@ -23,6 +23,8 @@ export default async function handler(
     frequency_penalty,
     presence_penalty,
     messages,
+    tools,
+    tool_choice,
   } = await req.json();
 
   if (!messages) {
@@ -48,6 +50,8 @@ export default async function handler(
   const payload: OpenAIRequest = {
     ...config,
     messages,
+    tools,
+    tool_choice,
   };
 
   try {

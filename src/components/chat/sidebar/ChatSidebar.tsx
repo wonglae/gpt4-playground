@@ -49,7 +49,7 @@ export default function ChatSidebar({}: Props) {
 
         <Github />
         <span className="text-center text-primary/80">
-          Made with ❤️ by Nashex
+          Made with ❤️ by WongLae
         </span>
       </div>
     </div>

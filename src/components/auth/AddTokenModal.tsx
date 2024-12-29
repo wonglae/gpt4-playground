@@ -67,7 +67,7 @@ export default function AddTokenModal({ className }: Props) {
               . All requests are made on the client side, so your token is never
               sent to the server. If you would like more information look at the{" "}
               <a
-                href="https://github.com/Nashex/gpt4-playground"
+                href="https://github.com/wonglae/gpt4-playground"
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary hover:underline"

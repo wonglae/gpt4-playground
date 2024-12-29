@@ -6,6 +6,7 @@ import PlaygroundHeader from "@/components/playground/PlaygroundHeader";
 import SystemMessage from "@/components/playground/SystemMessage";
 import PlaygroundConversations from "@/components/playground/conversations/PlaygroundConversations";
 import PlaygroundProvider from "@/context/PlaygroundProvider";
+import Tools from "@/components/playground/Tools";
 
 export default function Playground() {
   return (
@@ -22,8 +23,13 @@ export default function Playground() {
           <div className="flex h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] grow flex-row">
             <div className="flex grow flex-col items-stretch md:flex-row">
               <PlaygroundConversations />
-              <div className="flex grow">
-                <SystemMessage />
+              <div className="flex flex-col items-stretch md:w-1/4">
+                <div className="flex grow">
+                  <SystemMessage />
+                </div>
+                <div className="flex grow">
+                  <Tools />
+                </div>
               </div>
               <div className="flex grow basis-7/12 overflow-hidden">
                 <PlaygroundMessages />

@@ -2,7 +2,7 @@ import { OpenAIChatModels } from "./OpenAI.constants";
 
 export interface OpenAIChatMessage {
   id?: number;
-  role: "system" | "assistant" | "user";
+  role: "system" | "assistant" | "tool" | "user";
   content: string;
 }
 

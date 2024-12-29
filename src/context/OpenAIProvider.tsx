@@ -27,26 +27,30 @@ const defaultContext = {
   } as OpenAISystemMessage,
   messages: [] as OpenAIChatMessage[],
   config: defaultConfig as OpenAIConfig,
-  updateSystemMessage: (content: string) => {},
-  addMessage: () => {},
-  removeMessage: (id: number) => {},
+  updateSystemMessage: (content: string) => { },
+  tools: "",
+  updateTools: (content: string) => { },
+  addMessage: () => { },
+  removeMessage: (id: number) => { },
   conversationName: "",
   conversationId: "",
-  deleteConversation: () => {},
-  updateConversationName: () => {},
+  deleteConversation: () => { },
+  updateConversationName: () => { },
   conversations: {} as History,
-  clearConversations: () => {},
-  clearConversation: () => {},
-  loadConversation: (id: string, conversation: Conversation) => {},
-  toggleMessageRole: (id: number) => {},
-  updateMessageContent: (id: number, content: string) => {},
-  updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
-  submit: () => {},
+  clearConversations: () => { },
+  clearConversation: () => { },
+  loadConversation: (id: string, conversation: Conversation) => { },
+  toggleMessageRole: (id: number) => { },
+  updateMessageContent: (id: number, content: string) => { },
+  updateConfig: (newConfig: Partial<OpenAIConfig>) => { },
+  submit: () => { },
   loading: true,
   error: "",
 };
 
 const OpenAIContext = React.createContext<{
+  tools: string;
+  updateTools: (content: string) => void;
   systemMessage: OpenAISystemMessage;
   messages: OpenAIChatMessage[];
   config: OpenAIConfig;
@@ -90,11 +94,16 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   );
   const [config, setConfig] = React.useState<OpenAIConfig>(defaultConfig);
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
+  const [tools, setTools] = React.useState<string>("");
 
   // Load conversation from local storage
   useEffect(() => {
     setConversations(getHistory());
   }, []);
+
+  const updateTools = (content: string) => {
+    setTools(content);
+  };
 
   const updateSystemMessage = (content: string) => {
     setSystemMessage({
@@ -118,7 +127,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         ...prev.slice(0, index),
         {
           ...message,
-          role: message.role === "user" ? "assistant" : "user",
+          role: message.role === "user" ? "assistant" : message.role === "assistant" ? "tool" : message.role === "tool" ? "system" : "user",
         },
         ...prev.slice(index + 1),
       ];
@@ -242,6 +251,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
       messages_ = messages_.length ? messages_ : messages;
 
+      const toolsObj = tools ? JSON.parse(tools) : undefined;
+
       try {
         const decoder = new TextDecoder();
         const { body, ok } = await fetch("/api/completion", {
@@ -252,6 +263,10 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           },
           body: JSON.stringify({
             ...config,
+            ... {
+              tools: toolsObj,
+              tool_choice: toolsObj ? "auto" : undefined,
+            },
             messages: [systemMessage, ...messages_].map(
               ({ role, content }) => ({
                 role,
@@ -268,12 +283,19 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           // Get the error message from the response body
           const { value } = await reader.read();
           const chunkValue = decoder.decode(value);
-          const { error } = JSON.parse(chunkValue);
+          try {
+            const { error } = JSON.parse(chunkValue);
 
-          throw new Error(
-            error?.message ||
+            throw new Error(
+              error?.message ||
               "Failed to fetch response, check your API key and try again."
-          );
+            );
+          } catch (e) {
+            throw new Error(
+              chunkValue ||
+              "Failed to fetch response, check your API key and try again."
+            );
+          }
         }
 
         let done = false;
@@ -312,7 +334,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
       setLoading(false);
     },
-    [config, messages, systemMessage, loading, token]
+    [config, tools, messages, systemMessage, loading, token]
   );
 
   const addMessage = useCallback(
@@ -339,10 +361,12 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
   const value = React.useMemo(
     () => ({
+      tools,
       systemMessage,
       messages,
       config,
       loading,
+      updateTools,
       updateSystemMessage,
       addMessage,
       removeMessage,
@@ -361,6 +385,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       error,
     }),
     [
+      tools,
       systemMessage,
       messages,
       config,
