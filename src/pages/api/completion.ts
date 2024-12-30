@@ -4,6 +4,12 @@ import { OpenAIRequest } from "@/utils/OpenAI";
 
 export const config = {
   runtime: "edge",
+  unstable_allowDynamic: [
+    // allows a single file
+    //'/lib/utilities.js',
+    // use a glob to allow anything in the function-bind 3rd party module
+    '**/node_modules/lodash/lodash.js',
+  ],
 };
 
 interface Response {
